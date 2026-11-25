@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#120c24">
+<title>追星心动测试馆</title>
+<style>
+:root{
+  color-scheme:dark;
+  --bg:#120c24; --text:#f6f1ff; --sub:#b9aed6; --dim:#7f74a3; --gold:#f3d9a4; --line:rgba(255,255,255,.14);
+  --serif:"Songti SC","STSong","Noto Serif SC","Source Han Serif SC","SimSun",serif;
+  --sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans SC",sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{min-height:100vh;min-height:100dvh;font-family:var(--sans);color:var(--text);-webkit-font-smoothing:antialiased;
+  background:linear-gradient(180deg,rgba(18,12,36,.35),rgba(18,12,36,.9) 70%),url("assets/hero.webp") center top/cover fixed,var(--bg)}
+main{max-width:480px;margin:0 auto;padding:calc(48px + env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) calc(32px + env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
+  display:flex;flex-direction:column;gap:18px;text-align:center}
+.badge{align-self:center;font-size:12px;letter-spacing:.3em;color:var(--gold);padding:6px 14px;border:1px solid rgba(243,217,164,.4);border-radius:99px;background:rgba(18,12,36,.4)}
+h1{font-family:var(--serif);font-size:42px;font-weight:900;letter-spacing:.08em;line-height:1.2;
+  background:linear-gradient(180deg,#fff 30%,#ffd5ec 100%);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 4px 24px rgba(255,120,190,.45))}
+.lead{font-size:15px;line-height:1.8;color:#e4dbf7}
+.cards{display:flex;flex-direction:column;gap:14px;margin-top:8px}
+a.card{display:grid;grid-template-columns:84px 1fr;gap:14px;align-items:center;text-align:left;text-decoration:none;color:var(--text);
+  padding:16px;border-radius:22px;border:1px solid var(--line);
+  background:linear-gradient(160deg,rgba(255,255,255,.12),rgba(18,12,36,.55));backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  box-shadow:0 18px 40px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.15);transition:transform .25s,border-color .25s}
+a.card:hover{transform:translateY(-3px);border-color:rgba(255,170,215,.7)}
+a.card:focus-visible{outline:2px solid #ffb3d6;outline-offset:3px}
+a.card img{width:84px;height:84px;object-fit:cover;border-radius:18px}
+a.card img.emblem{object-fit:contain;filter:drop-shadow(0 6px 14px rgba(255,140,200,.45))}
+a.card b{display:block;font-family:var(--serif);font-size:20px;letter-spacing:.04em}
+a.card span{display:block;font-size:13px;color:var(--sub);line-height:1.6;margin-top:4px}
+a.card em{display:inline-block;font-style:normal;font-size:11px;color:var(--gold);margin-top:6px;letter-spacing:.1em}
+.tip{font-size:11px;color:var(--dim);line-height:1.7;margin-top:6px}
+</style>
+</head>
+<body>
+<main>
+  <div class="badge">IDOL · TEST · HOUSE</div>
+  <h1>追星心动测试馆</h1>
+  <p class="lead">两个专为追星人准备的小测试<br>测完截图，晒给同担看</p>
+  <div class="cards">
+    <a class="card" href="idol.html"><img class="emblem" src="assets/emblem_S.webp" alt=""><div><b>本命爱豆测试</b><span>40 道题，测出你命中注定的本命类型</span><em>8 种类型 · 约 6 分钟</em></div></a>
+    <a class="card" href="fate.html"><img src="assets/redthread.webp" alt=""><div><b>追星缘分度测试</b><span>填上你和本命的信息，演完两幕剧情，抽前世卡、系红线</span><em>6 种关系剧本 · 约 5 分钟</em></div></a>
+  </div>
+  <p class="tip">仅供娱乐，结果不代表任何真实艺人</p>
+</main>
+</body>
+</html>

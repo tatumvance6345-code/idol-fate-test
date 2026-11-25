@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#120c24">
+<title>本命爱豆测试</title>
+<style>
+:root{
+  --bg:#120c24;
+  --bg2:#1d1438;
+  --card:rgba(255,255,255,.06);
+  --card-line:rgba(255,255,255,.12);
+  --text:#f6f1ff;
+  --sub:#b9aed6;
+  --dim:#7f74a3;
+  --pink:#ff8fc7;
+  --lilac:#b79cff;
+  --gold:#f3d9a4;
+  --accent:linear-gradient(120deg,#ff9ccf 0%,#c3a4ff 55%,#9fd4ff 100%);
+  --radius:22px;
+  --ease:cubic-bezier(.22,.8,.24,1);
+  --serif:"Songti SC","STSong","Noto Serif SC","Source Han Serif SC","SimSun",serif;
+  --sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans SC",sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  font-family:var(--sans);
+  color:var(--text);
+  background:var(--bg);
+  min-height:100vh;min-height:100dvh;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+/* 背景光斑 */
+.sky{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;
+  background:radial-gradient(120% 80% at 50% -10%,#2b1d55 0%,var(--bg) 60%)}
+.glow{position:absolute;border-radius:50%;filter:blur(70px);opacity:.55;animation:float 14s ease-in-out infinite}
+.glow.g1{width:360px;height:360px;background:#ff7fbf;top:-80px;left:-120px}
+.glow.g2{width:320px;height:320px;background:#8b6bff;top:30%;right:-140px;animation-delay:-5s}
+.glow.g3{width:300px;height:300px;background:#5fb8ff;bottom:-120px;left:10%;opacity:.35;animation-delay:-9s}
+@keyframes float{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(30px,40px) scale(1.12)}}
+.sky .photo{position:absolute;inset:0;background:url("assets/hero.webp") center bottom/cover no-repeat;opacity:0;transition:opacity 1s}
+.sky .photo.ready{opacity:.95}
+.sky .shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(18,12,36,.35) 0%,rgba(18,12,36,.5) 55%,rgba(18,12,36,.2) 100%);transition:background .8s}
+body:not(.on-home) .sky .shade{background:rgba(18,12,36,.84)}
+.stars{position:absolute;inset:0}
+/* 带角花的框（题目卡、输入框） */
+.frame{position:relative;border-radius:24px;padding:22px 18px 20px;
+  background:linear-gradient(160deg,rgba(255,255,255,.09),rgba(255,255,255,.025));
+  border:1px solid var(--card-line);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  box-shadow:0 18px 50px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.12)}
+.frame::before,.frame::after{content:"";position:absolute;width:26px;height:26px;pointer-events:none;border:1.5px solid rgba(243,217,164,.75)}
+.frame::before{top:8px;left:8px;border-right:0;border-bottom:0;border-top-left-radius:14px}
+.frame::after{bottom:8px;right:8px;border-left:0;border-top:0;border-bottom-right-radius:14px}
+.frame .spark{position:absolute;font-size:10px;color:var(--gold);opacity:.85;pointer-events:none}
+.frame .spark.tr{top:10px;right:14px}.frame .spark.bl{bottom:10px;left:14px}
+.emblems{display:flex;justify-content:center;gap:2px;margin:4px auto 0}
+.emblems img{width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 4px 10px rgba(255,140,200,.35));animation:bob 3.2s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-7px)}}
+.stars i{position:absolute;width:2px;height:2px;border-radius:50%;background:#fff;opacity:.6;animation:twinkle 3s ease-in-out infinite}
+@keyframes twinkle{0%,100%{opacity:.15}50%{opacity:.9}}
+
+.app{position:relative;z-index:1;max-width:480px;margin:0 auto;min-height:100vh;min-height:100dvh;
+  padding:calc(20px + env(safe-area-inset-top)) 20px calc(28px + env(safe-area-inset-bottom));display:flex;flex-direction:column}
+.screen{display:none;flex:1;flex-direction:column}
+.screen.active{display:flex;animation:screenIn .6s var(--ease) both}
+@keyframes screenIn{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+
+/* ---------- 首页 ---------- */
+.home{justify-content:center;text-align:center;gap:22px}
+.badge{align-self:center;font-size:12px;letter-spacing:.3em;color:var(--gold);
+  padding:6px 14px;border:1px solid rgba(243,217,164,.35);border-radius:99px;background:rgba(243,217,164,.06)}
+.orb{position:relative;width:150px;height:150px;margin:6px auto 0}
+.orb::before{content:"";position:absolute;inset:0;border-radius:50%;background:var(--accent);filter:blur(2px);
+  animation:spin 12s linear infinite;mask:radial-gradient(circle,transparent 62%,#000 63%);-webkit-mask:radial-gradient(circle,transparent 62%,#000 63%)}
+.orb::after{content:"";position:absolute;inset:18px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#fff 0%,#ffd6ee 18%,#c9b2ff 50%,#6c55c9 100%);
+  box-shadow:0 0 60px rgba(255,143,199,.6),inset -10px -14px 30px rgba(40,20,90,.55)}
+.orb span{position:absolute;inset:0;display:grid;place-items:center;z-index:2;font-size:44px;filter:drop-shadow(0 2px 8px rgba(80,30,140,.5))}
+@keyframes spin{to{transform:rotate(360deg)}}
+.home h1{font-family:var(--serif);font-size:44px;font-weight:900;letter-spacing:.08em;line-height:1.15;
+  background:linear-gradient(180deg,#fff 20%,#f0d9ff 100%);-webkit-background-clip:text;background-clip:text;color:transparent;
+  text-shadow:0 0 40px rgba(255,160,220,.25)}
+.home .lead{font-size:15px;line-height:1.9;color:var(--sub)}
+.home .lead b{color:var(--text);font-weight:600}
+.meta{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
+.meta span{font-size:12px;color:var(--sub);padding:6px 12px;border-radius:99px;background:var(--card);border:1px solid var(--card-line)}
+.name-field{display:flex;flex-direction:column;gap:8px;text-align:left}
+.name-field label{font-size:13px;color:var(--sub);padding-left:4px}
+.name-field input{width:100%;height:50px;border-radius:16px;border:1px solid var(--card-line);background:rgba(255,255,255,.05);
+  color:var(--text);font-size:16px;padding:0 18px;outline:none;transition:border-color .25s,background .25s;font-family:inherit}
+.name-field input::placeholder{color:var(--dim)}
+.name-field input:focus{border-color:rgba(255,143,199,.6);background:rgba(255,255,255,.08)}
+
+.btn{appearance:none;border:0;cursor:pointer;font-family:inherit;font-size:16px;font-weight:600;letter-spacing:.08em;
+  height:54px;border-radius:99px;color:#2a1240;background:var(--accent);background-size:160% 100%;
+  box-shadow:0 10px 30px rgba(255,130,200,.35),inset 0 1px 0 rgba(255,255,255,.6);
+  transition:transform .2s var(--ease),box-shadow .3s,background-position .6s;width:100%}
+.btn:hover{background-position:100% 0;box-shadow:0 14px 38px rgba(190,150,255,.45),inset 0 1px 0 rgba(255,255,255,.6)}
+.btn:active{transform:scale(.97)}
+.btn.ghost{background:transparent;color:var(--text);border:1px solid var(--card-line);box-shadow:none}
+.btn.ghost:hover{background:rgba(255,255,255,.06)}
+.resume{font-size:13px;color:var(--sub);background:none;border:0;cursor:pointer;text-decoration:underline;text-underline-offset:4px;font-family:inherit}
+.tip{font-size:11px;color:var(--dim);line-height:1.7}
+
+/* ---------- 答题 ---------- */
+.quiz{gap:18px}
+.topbar{display:flex;align-items:center;gap:12px}
+.back{width:38px;height:38px;flex:none;border-radius:50%;border:1px solid var(--card-line);background:var(--card);color:var(--text);
+  font-size:18px;cursor:pointer;display:grid;place-items:center;transition:opacity .2s,background .2s}
+.back:hover{background:rgba(255,255,255,.1)}
+.back:disabled{opacity:.25;cursor:default}
+.progress-wrap{flex:1}
+.progress-info{display:flex;justify-content:space-between;align-items:baseline;font-size:12px;color:var(--sub);margin-bottom:8px}
+.progress-info .chapter{color:var(--gold);letter-spacing:.12em}
+.progress-info .count b{font-size:16px;color:var(--text);font-weight:700}
+.bar{height:6px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden;position:relative}
+.bar i{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:99px;background:var(--accent);
+  box-shadow:0 0 12px rgba(255,143,199,.8);transition:width .5s var(--ease)}
+.dots{display:flex;gap:4px;margin-top:8px}
+.dots span{flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,.08);transition:background .4s}
+.dots span.on{background:rgba(243,217,164,.7)}
+
+.qcard{position:relative;flex:none;display:flex;flex-direction:column;gap:18px;margin-top:6px}
+.qcard.out{animation:qOut .28s var(--ease) forwards}
+.qcard.in{animation:qIn .45s var(--ease) both}
+.qcard.in-back{animation:qInBack .45s var(--ease) both}
+@keyframes qOut{to{opacity:0;transform:translateX(-36px)}}
+@keyframes qIn{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:none}}
+@keyframes qInBack{from{opacity:0;transform:translateX(-40px)}to{opacity:1;transform:none}}
+.qno{font-family:var(--serif);font-size:13px;color:var(--pink);letter-spacing:.2em}
+.qtext{font-family:var(--serif);font-size:23px;line-height:1.55;font-weight:700;min-height:72px}
+.options{display:flex;flex-direction:column;gap:12px;margin-top:4px}
+.opt{position:relative;display:flex;align-items:center;gap:14px;text-align:left;width:100%;
+  padding:16px 18px;border-radius:18px;border:1px solid var(--card-line);background:var(--card);
+  color:var(--text);font-size:15.5px;line-height:1.55;cursor:pointer;font-family:inherit;
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  transition:transform .2s var(--ease),border-color .25s,background .25s;
+  animation:optIn .5s var(--ease) both}
+.opt:nth-child(2){animation-delay:.05s}.opt:nth-child(3){animation-delay:.1s}.opt:nth-child(4){animation-delay:.15s}
+@keyframes optIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.opt .key{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:700;
+  color:var(--lilac);border:1px solid rgba(183,156,255,.4);transition:all .25s}
+@media (hover:hover){.opt:hover{border-color:rgba(255,143,199,.5);background:rgba(255,255,255,.09);transform:translateY(-2px)}}
+.opt:active{transform:scale(.98)}
+.opt.picked{border-color:transparent;background:linear-gradient(120deg,rgba(255,156,207,.28),rgba(195,164,255,.28));
+  box-shadow:0 0 0 1.5px rgba(255,180,225,.8),0 8px 24px rgba(255,130,200,.25)}
+.opt.picked .key{background:var(--accent);color:#2a1240;border-color:transparent}
+
+/* 章节过场 */
+.chapter-card{position:fixed;inset:0;z-index:20;display:grid;place-items:center;text-align:center;
+  background:rgba(18,12,36,.86);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  opacity:0;pointer-events:none;transition:opacity .45s}
+.chapter-card.show{opacity:1;pointer-events:auto}
+.chapter-card .inner{transform:translateY(12px);transition:transform .6s var(--ease)}
+.chapter-card.show .inner{transform:none}
+.chapter-card small{display:block;font-size:12px;letter-spacing:.4em;color:var(--gold);margin-bottom:14px}
+.chapter-card h2{font-family:var(--serif);font-size:34px;letter-spacing:.12em}
+.chapter-card p{margin-top:12px;color:var(--sub);font-size:14px}
+
+/* ---------- 计算中 ---------- */
+.loading{justify-content:center;align-items:center;text-align:center;gap:26px}
+.loader{position:relative;width:120px;height:120px}
+.loader i{position:absolute;inset:0;border-radius:50%;border:2px solid transparent;border-top-color:var(--pink);animation:spin 1.2s linear infinite}
+.loader i:nth-child(2){inset:14px;border-top-color:var(--lilac);animation-duration:1.8s;animation-direction:reverse}
+.loader i:nth-child(3){inset:28px;border-top-color:var(--gold);animation-duration:2.4s}
+.loader b{position:absolute;inset:0;display:grid;place-items:center;font-size:30px;animation:pulse 1.4s ease-in-out infinite}
+@keyframes pulse{50%{transform:scale(1.18)}}
+.loading p{font-family:var(--serif);font-size:18px;letter-spacing:.1em;min-height:28px}
+.loading small{color:var(--dim);font-size:12px}
+
+/* ---------- 结果 ---------- */
+.result{gap:18px}
+.share{position:relative;border-radius:28px;overflow:hidden;padding:26px 22px 22px;
+  background:var(--card-bg,linear-gradient(160deg,#3a2470,#1b1236));
+  box-shadow:0 24px 60px rgba(0,0,0,.45),inset 0 0 0 1px rgba(255,255,255,.14)}
+.share::before{content:"";position:absolute;width:280px;height:280px;border-radius:50%;right:-90px;top:-90px;
+  background:radial-gradient(circle,var(--c1,#ff9ccf) 0%,transparent 70%);opacity:.55}
+.share::after{content:"";position:absolute;width:240px;height:240px;border-radius:50%;left:-100px;bottom:60px;
+  background:radial-gradient(circle,var(--c2,#9fd4ff) 0%,transparent 70%);opacity:.35}
+.share>*{position:relative;z-index:1}
+.share>.tex{position:absolute;inset:0;z-index:0;background:url("assets/texture.webp") center/cover;opacity:.5;mix-blend-mode:screen;pointer-events:none}
+.type-emoji img{width:58px;height:58px;object-fit:contain;filter:drop-shadow(0 4px 10px rgba(0,0,0,.35))}
+.all-types>div{display:grid;grid-template-columns:36px 1fr;column-gap:8px;align-items:center}
+.all-types img{width:36px;height:36px;object-fit:contain;grid-row:span 2}
+.share-head{display:flex;justify-content:space-between;align-items:center;font-size:11px;letter-spacing:.2em;color:rgba(255,255,255,.7)}
+.share-head b{font-family:var(--serif);font-size:13px;letter-spacing:.25em;color:#fff}
+.who{margin-top:20px;font-size:13px;color:rgba(255,255,255,.75);letter-spacing:.1em}
+.type-row{display:flex;align-items:center;gap:14px;margin-top:8px}
+.type-emoji{flex:none;width:64px;height:64px;border-radius:20px;display:grid;place-items:center;font-size:34px;
+  background:rgba(255,255,255,.14);box-shadow:inset 0 0 0 1px rgba(255,255,255,.25)}
+.type-name{font-family:var(--serif);font-size:30px;font-weight:900;line-height:1.2;letter-spacing:.05em}
+.type-alias{font-size:13px;color:rgba(255,255,255,.8);margin-top:4px;letter-spacing:.08em}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:16px}
+.tags span{font-size:12px;padding:5px 11px;border-radius:99px;background:rgba(255,255,255,.14);color:#fff}
+.fate{display:flex;align-items:center;gap:16px;margin-top:18px;padding:14px 16px;border-radius:18px;background:rgba(0,0,0,.22)}
+.ring{--p:90;flex:none;width:78px;height:78px;border-radius:50%;display:grid;place-items:center;
+  background:conic-gradient(var(--c1,#ff9ccf) calc(var(--p)*1%),rgba(255,255,255,.12) 0)}
+.ring div{width:64px;height:64px;border-radius:50%;background:rgba(20,12,40,.92);display:grid;place-items:center;text-align:center}
+.ring b{font-size:22px;font-weight:800;line-height:1}
+.ring b small{font-size:11px}
+.ring em{display:block;font-style:normal;font-size:9px;color:rgba(255,255,255,.6);margin-top:3px;letter-spacing:.1em}
+.fate-text{font-size:13px;line-height:1.7;color:rgba(255,255,255,.88)}
+.fate-text b{display:block;font-family:var(--serif);font-size:15px;color:#fff;margin-bottom:2px}
+.block{margin-top:16px}
+.block h4{font-size:12px;letter-spacing:.25em;color:var(--gold);margin-bottom:8px;font-weight:600}
+.block p{font-size:14px;line-height:1.85;color:rgba(255,255,255,.92)}
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+.duo div{padding:12px 14px;border-radius:16px;background:rgba(255,255,255,.08)}
+.duo small{display:block;font-size:11px;color:rgba(255,255,255,.6);letter-spacing:.15em;margin-bottom:4px}
+.duo b{font-size:14px;font-weight:700;display:flex;align-items:center;gap:6px}
+.swatch{width:14px;height:14px;border-radius:50%;box-shadow:0 0 0 2px rgba(255,255,255,.4)}
+.bars{display:flex;flex-direction:column;gap:9px}
+.bars .row{display:grid;grid-template-columns:auto 1fr 38px;white-space:nowrap;align-items:center;gap:10px;font-size:12.5px}
+.bars .track{height:7px;border-radius:99px;background:rgba(255,255,255,.12);overflow:hidden}
+.bars .track i{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,var(--c1,#ff9ccf),var(--c2,#9fd4ff));transition:width 1.2s var(--ease)}
+.bars .row span:last-child{text-align:right;color:rgba(255,255,255,.75)}
+.share-foot{margin-top:20px;padding-top:14px;border-top:1px dashed rgba(255,255,255,.22);
+  display:flex;justify-content:space-between;font-size:11px;color:rgba(255,255,255,.6);letter-spacing:.1em}
+.after{display:flex;flex-direction:column;gap:12px}
+.after .hint{text-align:center;font-size:12px;color:var(--sub)}
+.btns{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.toast{position:fixed;left:50%;bottom:calc(40px + env(safe-area-inset-bottom));transform:translate(-50%,20px);z-index:30;
+  padding:10px 18px;border-radius:99px;background:rgba(255,255,255,.92);color:#2a1240;font-size:13px;font-weight:600;
+  opacity:0;pointer-events:none;transition:all .35s var(--ease)}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.all-types{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.all-types div{padding:12px;border-radius:16px;background:var(--card);border:1px solid var(--card-line);font-size:12px;color:var(--sub);line-height:1.5}
+.all-types div b{display:block;font-size:14px;color:var(--text);margin-bottom:2px}
+.all-types div.me{border-color:rgba(255,143,199,.6);background:rgba(255,143,199,.1)}
+.section-title{font-family:var(--serif);font-size:16px;letter-spacing:.15em;text-align:center;margin-top:8px;color:var(--sub)}
+.disclaimer{text-align:center;font-size:11px;color:var(--dim);line-height:1.7}
+
+@media (min-width:768px){
+  .app{padding-top:48px}
+  .home h1{font-size:52px}
+  .qtext{font-size:25px}
+}
+@media (max-width:360px){
+  .app{padding-left:16px;padding-right:16px}
+  .home h1{font-size:38px}
+  .qtext{font-size:20px}
+  .type-name{font-size:26px}
+}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body class="on-home">
+<div class="sky"><div class="photo" id="bgPhoto"></div><div class="glow g1"></div><div class="glow g2"></div><div class="glow g3"></div><div class="shade"></div><div class="stars" id="stars"></div></div>
+
+<main class="app">
+  <!-- 首页 -->
+  <section class="screen home active" id="home">
+    <div class="badge">IDOL · SOULMATE · TEST</div>
+    <h1>本命爱豆测试</h1>
+    <div class="emblems" id="homeEmblems"></div>
+    <p class="lead">40 道题，测出<b>命中注定的本命类型</b><br>你们之间的缘分指数，和那根看不见的红线</p>
+    <div class="meta"><span>📝 40 道单选</span><span>⏱ 约 6 分钟</span><span>🔮 8 种本命类型</span></div>
+    <div class="name-field">
+      <label for="nick">你的昵称（会写在结果卡上，可不填）</label>
+      <input id="nick" maxlength="12" placeholder="比如：月亮代表我的心" autocomplete="off">
+    </div>
+    <button class="btn" id="startBtn">开始测试</button>
+    <button class="resume" id="resumeBtn" hidden>继续上次的进度</button>
+    <p class="tip">凭第一直觉作答就好，没有对错<br>结果仅供娱乐，不代表任何真实艺人</p>
+  </section>
+
+  <!-- 答题 -->
+  <section class="screen quiz" id="quiz">
+    <div class="topbar">
+      <button class="back" id="backBtn" aria-label="上一题">‹</button>
+      <div class="progress-wrap">
+        <div class="progress-info"><span class="chapter" id="chapterLabel"></span><span class="count"><b id="qIndex">1</b> / 40</span></div>
+        <div class="bar"><i id="barFill"></i></div>
+        <div class="dots"><span></span><span></span><span></span><span></span></div>
+      </div>
+    </div>
+    <div class="qcard frame" id="qcard">
+      <span class="spark tr">✦</span><span class="spark bl">✦</span>
+      <div class="qno" id="qno"></div>
+      <h2 class="qtext" id="qtext"></h2>
+      <div class="options" id="options"></div>
+    </div>
+  </section>
+
+  <!-- 计算中 -->
+  <section class="screen loading" id="loading">
+    <div class="loader"><i></i><i></i><i></i><b>💗</b></div>
+    <p id="loadingText">正在连接你的红线……</p>
+    <small>请稍等片刻</small>
+  </section>
+
+  <!-- 结果 -->
+  <section class="screen result" id="result">
+    <article class="share" id="shareCard">
+      <div class="tex"></div>
+      <div class="share-head"><b>本命爱豆测试</b><span id="rDate"></span></div>
+      <div class="who" id="rWho"></div>
+      <div class="type-row">
+        <div class="type-emoji" id="rEmoji"></div>
+        <div><div class="type-name" id="rName"></div><div class="type-alias" id="rAlias"></div></div>
+      </div>
+      <div class="tags" id="rTags"></div>
+      <div class="fate">
+        <div class="ring" id="rRing"><div><div><b id="rFate"></b><em>缘分指数</em></div></div></div>
+        <div class="fate-text" id="rFateText"></div>
+      </div>
+      <div class="block"><h4>✦ 本命画像</h4><p id="rPortrait"></p></div>
+      <div class="block"><h4>✦ 你为什么会爱上 TA</h4><p id="rWhy"></p></div>
+      <div class="duo">
+        <div><small>你的追星人格</small><b id="rFan"></b></div>
+        <div><small>专属应援色</small><b id="rColor"></b></div>
+        <div><small>相遇场景</small><b id="rMeet"></b></div>
+        <div><small>红线暗号</small><b id="rCode"></b></div>
+      </div>
+      <div class="block"><h4>✦ 本命类型契合度</h4><div class="bars" id="rBars"></div></div>
+      <div class="share-foot"><span id="rNo"></span><span>截图晒出你的本命 ✦</span></div>
+    </article>
+
+    <div class="after">
+      <p class="hint">📸 截图这张卡片，分享到小红书 / 朋友圈</p>
+      <div class="btns">
+        <button class="btn ghost" id="copyBtn">复制分享文案</button>
+        <button class="btn" id="retryBtn">重新测试</button>
+      </div>
+      <a class="resume" style="text-align:center;display:block" href="fate.html">再测一个：我和本命的追星缘分度 →</a>
+    </div>
+
+    <h3 class="section-title">— 全部 8 种本命类型 —</h3>
+    <div class="all-types" id="allTypes"></div>
+    <p class="disclaimer">本测试仅供娱乐，结果为虚构的类型描述，<br>不指向、不代表任何真实艺人。</p>
+  </section>
+</main>
+
+<div class="chapter-card" id="chapterCard"><div class="inner"><small id="ccNo"></small><h2 id="ccTitle"></h2><p id="ccSub"></p></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ======================= 8 种本命类型 ======================= */
+const TYPES = {
+  S:{name:"天生舞台王者",alias:"TA 是为舞台而生的光",emoji:"👑",c1:"#ffb36b",c2:"#ff5d8f",bg:"linear-gradient(160deg,#5a1f3f 0%,#2a1236 55%,#160c26 100%)",
+     tags:["#舞台魅力拉满","#眼神杀","#燃到落泪"],
+     portrait:"灯光暗下的那一秒，TA 就换了一个人。台下也许话不多，可一踏上舞台，每一个定点、每一个眼神都像在宣告：这里是我的世界。TA 对自己近乎苛刻，一个动作可以练上一百遍。",
+     why:"你骨子里也藏着一团火。你欣赏全力以赴的人，TA 在舞台上燃烧的样子，替你说出了那些不敢大声说的野心。每次想放弃时，你都会想起 TA 汗湿的刘海。",
+     fan:"舞台守护者",color:["落日橙","#ff8a4c"],meet:"万人场馆的第一排",code:"「这一场，也只看你」",
+     fateLine:"你们的红线，系在舞台灯亮起的那一刻"},
+  W:{name:"温柔治愈系",alias:"TA 是你的晚安电台",emoji:"🌙",c1:"#a9c8ff",c2:"#ffc9e3",bg:"linear-gradient(160deg,#2b3a6b 0%,#221a45 55%,#140e28 100%)",
+     tags:["#情绪稳定","#说话轻轻的","#让人想哭的温柔"],
+     portrait:"TA 的温柔不是表演，是一种习惯。会记得工作人员的名字，会在直播结束前反复叮嘱大家早点睡。TA 的歌声像一条薄毯子，在你最冷的夜里刚好盖住你。",
+     why:"你是一个很会照顾别人、却常常忘了照顾自己的人。TA 出现的时候，你第一次觉得：原来我也可以被好好接住。你爱的不是完美，是那份“我在”的安心。",
+     fan:"安静陪伴型",color:["月光蓝","#9fb8ff"],meet:"凌晨两点的电台节目",code:"「今天也辛苦了」",
+     fateLine:"你们的红线，藏在每一句“晚安”里"},
+  Y:{name:"夏日少年感",alias:"TA 是一罐冒泡的汽水",emoji:"🫧",c1:"#7ff0d4",c2:"#8fc8ff",bg:"linear-gradient(160deg,#165466 0%,#1d2d5c 55%,#130d29 100%)",
+     tags:["#笑容犯规","#永远十八岁","#干净又热烈"],
+     portrait:"白 T、牛仔裤、被风吹乱的头发。TA 的快乐很简单，一顿炸鸡、一场球、和队友打闹就能笑一整天。镜头前坦坦荡荡，像夏天傍晚六点的风。",
+     why:"你心里住着一个不想长大的自己。TA 让你记起操场、蝉鸣和毫无理由的开心。喜欢 TA 的时候，你好像也重新回到了十七岁。",
+     fan:"元气打卡型",color:["薄荷汽水绿","#5fe0c0"],meet:"放学后的篮球场边",code:"「一起去看海吧」",
+     fateLine:"你们的红线，绑在同一个夏天"},
+  F:{name:"反差萌小狗",alias:"TA 是冷面下的小狗",emoji:"🐶",c1:"#d8a6ff",c2:"#ff9ccf",bg:"linear-gradient(160deg,#4a2470 0%,#2a1650 55%,#150c2a 100%)",
+     tags:["#台上猛兽台下小狗","#一秒破功","#可爱而不自知"],
+     portrait:"舞台上眼神凌厉、气场全开，一下台就开始抱着玩偶说话奶声奶气。被夸会害羞地捂脸，被逗会认真反驳到耳朵通红。TA 的反差，是最致命的武器。",
+     why:"你本身就是一个很难被一眼看透的人，外表和内心常常不一样。所以你天然会被“不止一面”的人吸引——发现 TA 隐藏的那一面时，就像拆到了只属于你的彩蛋。",
+     fan:"考古挖宝型",color:["星空紫","#b07cff"],meet:"后台走廊的一次擦肩",code:"「其实我很怕黑」",
+     fateLine:"你们的红线，打了一个只有你能解开的结"},
+  C:{name:"深夜创作者",alias:"TA 把心事写成歌",emoji:"🎧",c1:"#ffd59a",c2:"#b79cff",bg:"linear-gradient(160deg,#3d2a55 0%,#241a3f 55%,#120c24 100%)",
+     tags:["#才华本华","#宝藏作词人","#灵魂会发光"],
+     portrait:"录音室的灯常常亮到凌晨。TA 习惯把说不出口的话写进歌词里，一句旋律反复推翻几十次。比起被看见，TA 更在乎作品有没有被真正听懂。",
+     why:"你是一个内心戏很丰富的人，总觉得这个世界需要被更认真地感受。TA 的作品像一封封写给你的信，你一读就懂——这是只有灵魂相近的人才有的默契。",
+     fan:"作品研究型",color:["琥珀金","#f2b766"],meet:"一家放着老唱片的咖啡馆",code:"「这首歌，第三句是写给你的」",
+     fateLine:"你们的红线，缠在某一段旋律里"},
+  G:{name:"月光贵公子",alias:"TA 是遥不可及的月亮",emoji:"🌹",c1:"#f3d9a4",c2:"#c9c3ff",bg:"linear-gradient(160deg,#2a2440 0%,#1c1830 55%,#0f0b1c 100%)",
+     tags:["#高冷贵气","#神颜暴击","#只可远观"],
+     portrait:"TA 话不多，笑也很少，却总能在人群里一眼被认出来。举手投足都有一种安静的体面，像一幅挂在美术馆里的画。偶尔一个浅笑，就能让全场尖叫。",
+     why:"你有自己的审美洁癖和精神世界，不轻易心动。TA 的疏离感恰好让你着迷——你享受这种“仰望”的距离，因为那代表着一种永远不会被消磨的美。",
+     fan:"高冷审美型",color:["香槟金","#e8c98a"],meet:"一场私人画展的闭馆时刻",code:"「月色真美」",
+     fateLine:"你们的红线，隔着光年依然闪光"},
+  X:{name:"快乐小太阳",alias:"TA 是行走的快乐源泉",emoji:"🌻",c1:"#ffe26b",c2:"#ff9f7a",bg:"linear-gradient(160deg,#5c3a1c 0%,#3a1f3a 55%,#1a0f28 100%)",
+     tags:["#综艺感爆棚","#笑点超低","#人间开心果"],
+     portrait:"只要 TA 在，就不会冷场。会在严肃场合突然破功，会把队友逗得满地打滚，会认真地做一些很好笑的事情。但你知道，TA 的快乐里藏着一份很体贴的善意。",
+     why:"你值得被逗笑。生活有很多不容易，而 TA 总能在你最丧的时候，用一个离谱的表情把你拽回来。你爱的，是那种“和 TA 在一起什么都不怕”的轻松。",
+     fan:"表情包产出型",color:["向日葵黄","#ffd23f"],meet:"一档综艺的录制现场",code:"「笑一个嘛」",
+     fateLine:"你们的红线，是一串停不下来的笑声"},
+  B:{name:"人间恋人系",alias:"TA 是宠粉天花板",emoji:"💌",c1:"#ff9ccf",c2:"#ffc7a8",bg:"linear-gradient(160deg,#5e2450 0%,#36173f 55%,#180c28 100%)",
+     tags:["#宠粉天花板","#恋爱感拉满","#每句都是糖"],
+     portrait:"TA 记得粉丝的昵称，会在签售时认真看着你的眼睛，会在下班路上发一条“到家了吗”。TA 把每一次见面都当成约会，让人分不清是心动还是心安。",
+     why:"你是一个很珍惜双向奔赴的人。比起遥远的偶像，你更想要被回应、被记住的感觉。TA 给你的每一句回应，你都会小心收好，像收集糖纸一样。",
+     fan:"双向奔赴型",color:["樱花粉","#ff8fc0"],meet:"雨天里 TA 递来的一把伞",code:"「到家了吗？」",
+     fateLine:"你们的红线，一头在你手里，一头在 TA 心上"}
+};
+const ORDER = ["S","W","Y","F","C","G","X","B"];
+
+/* ======================= 4 个章节 ======================= */
+const CHAPTERS = [
+  {title:"你的小宇宙",sub:"先来认识一下你自己"},
+  {title:"心动信号",sub:"什么样的瞬间会击中你"},
+  {title:"追光的人",sub:"你是怎样喜欢一个人的"},
+  {title:"命运红线",sub:"最后，交给直觉"}
+];
+
+/* ======================= 40 道题 =======================
+   每个选项：[文字, 计分]，计分字符串第 1 个字母 +2 分，其余 +1 分 */
+const QUESTIONS = [
+  // 第一章 你的小宇宙
+  ["周末早上醒来，你最想做的第一件事是？",[["拉开窗帘，放一首燃炸的歌开启一天","SY"],["窝在被子里，再听一会儿雨声","W"],["约朋友出门骑车、吃早餐","YX"],["先刷一会儿搞笑视频，把自己笑清醒","XF"]]],
+  ["朋友形容你，最常用的词是？",[["靠谱又温柔","WB"],["看着冷，其实很好玩","FG"],["有想法，有点小才华","C"],["气场强，存在感拉满","SG"]]],
+  ["你的手机壁纸更可能是？",[["傍晚的海和晚霞","WY"],["一张氛围感拉满的舞台照","S"],["极简的黑白构图","GC"],["一只表情很欠的小狗","FX"]]],
+  ["一个人去旅行，你会选？",[["去有音乐节的城市","SX"],["安静的海边小镇","W"],["老街区，逛美术馆和旧书店","GC"],["说走就走，到了再说","Y"]]],
+  ["深夜睡不着时，你通常在？",[["写点什么，或者哼一段旋律","C"],["和喜欢的人聊天到天亮","B"],["刷综艺切片笑出声","X"],["看着天花板想人生","GW"]]],
+  ["你对“仪式感”的态度是？",[["很需要，节日礼物一样都不能少","B"],["无所谓，开心就好","YX"],["喜欢，但一定要精致有品味","G"],["喜欢出其不意的小惊喜","FB"]]],
+  ["在群聊里，你通常是？",[["气氛组，负责接梗","X"],["潜水，但会突然冒出一句金句","FC"],["默默帮大家整理信息的人","W"],["发起话题和组局的人","SY"]]],
+  ["你最喜欢的季节？",[["夏天，汽水和蝉鸣","Y"],["冬天，围巾和热可可","WF"],["秋天，落叶和长风衣","GC"],["春天，一切刚刚开始","B"]]],
+  ["如果能拥有一项天赋，你想要？",[["一开口就让全场安静的嗓音","S"],["写出打动人心的歌词","C"],["让所有人都开心的幽默感","X"],["一眼看穿人心的直觉","FG"]]],
+  ["面对压力时，你更倾向于？",[["运动出汗，全部发泄出来","YS"],["找人倾诉，被抱一抱就好","B"],["一个人消化，不让别人看见","G"],["把情绪写下来或者画出来","CW"]]],
+
+  // 第二章 心动信号
+  ["看演出时，最让你心动的瞬间是？",[["灯光全暗后，TA 的第一个定点","S"],["唱到高音时，TA 微微闭上眼","C"],["下台前偷偷对镜头比了个心","B"],["失误后自己先笑场","XF"]]],
+  ["你更容易被哪种眼神击中？",[["舞台上像要把人吃掉的眼神","S"],["看向你时温柔得要化掉","W"],["冷冷地扫过来一眼","G"],["笑起来眼睛弯成月牙","YX"]]],
+  ["最戳你的“反差”是？",[["台上是猛兽，下台软乎乎","F"],["平时高冷，只对你话多","GB"],["看起来很乖，其实很会撩","BF"],["看着不正经，认真起来超可靠","XS"]]],
+  ["哪句话会让你瞬间破防？",[["“今天也辛苦了，早点休息。”","W"],["“这首歌，是写给你们的。”","C"],["“我会一直站在这里。”","S"],["“你笑起来真好看。”","BY"]]],
+  ["理想中 TA 的穿搭风格？",[["白 T 牛仔裤，干净少年","Y"],["黑色西装，贵气逼人","G"],["闪片舞台装，耀眼夺目","S"],["宽大卫衣，软软一只","FW"]]],
+  ["你更喜欢 TA 的哪种声音？",[["低沉有磁性的念白","G"],["清亮干净的少年音","Y"],["带点沙哑的深夜嗓","CW"],["软软的撒娇语气","BF"]]],
+  ["看 TA 直播，你最期待？",[["突然清唱一段没发的新歌","C"],["认真回复粉丝留言","B"],["和队友互相拆台","X"],["安静地陪大家聊到很晚","W"]]],
+  ["哪个小动作最让你上头？",[["抬手撩起汗湿的头发","S"],["低头推一下眼镜","GC"],["歪头冲镜头笑","YB"],["害羞时偷偷捏自己耳朵","F"]]],
+  ["想到 TA，你会联想到哪种气味？",[["洗衣液和阳光","Y"],["木质香和雪松","G"],["牛奶和棉花糖","FB"],["雨后的青草","WC"]]],
+  ["TA 最打动你的品质是？",[["对舞台的执着","S"],["对创作的热爱","C"],["对粉丝的珍惜","BW"],["永远真诚地做自己","XY"]]],
+
+  // 第三章 追光的人
+  ["你的追星方式更接近？",[["冲在一线的舞台记录者","S"],["默默收藏一切的安静粉","W"],["研究作品的考据党","CF"],["产出表情包的快乐源泉","X"]]],
+  ["如果去签售，你会对 TA 说？",[["“你的舞台是我的充电宝！”","SY"],["“你要好好吃饭、好好睡觉。”","W"],["“新歌的词写得太好了。”","C"],["紧张到只会对着 TA 傻笑","FB"]]],
+  ["你的应援物里最多的是？",[["灯牌和手幅","S"],["专辑和小卡","BC"],["照片和手账","W"],["各种玩偶周边","FX"]]],
+  ["看到 TA 被误解时，你会？",[["冷静整理事实，理性控评","G"],["心疼到睡不着","W"],["写一篇长文替 TA 说话","CB"],["发一堆 TA 的搞笑视频治愈大家","X"]]],
+  ["你最想和 TA 一起做的事？",[["在空荡荡的练习室一起跳舞","S"],["深夜去便利店吃泡面","YX"],["在录音室熬夜写歌","C"],["一起坐游乐园的摩天轮","B"]]],
+  ["TA 的哪种物料你会反复看？",[["高清直拍","S"],["练习生时期的旧视频","YF"],["综艺高光名场面","X"],["生日 vlog 和日常碎片","BW"]]],
+  ["你追星最大的收获是？",[["被 TA 的努力激励，自己也变好了","SY"],["在难熬的日子里有了光","W"],["认识了一群可爱的朋友","X"],["学会了欣赏音乐和艺术","CG"]]],
+  ["如果 TA 公开恋爱了，你的第一反应？",[["“只要 TA 幸福就好。”","W"],["有点难过，但还会支持作品","C"],["“早说了，TA 就是恋人体质！”","BX"],["冷静地默默离开，各自安好","G"]]],
+  ["你会在什么时候想起 TA？",[["听到某首歌的前奏","C"],["看到晚霞的时候","WY"],["自己想放弃的时候","S"],["吃到好吃的东西","XF"]]],
+  ["你最受不了 TA 的哪一点（宠溺版）？",[["太拼了，总让人担心","S"],["笑点低到离谱","X"],["明明是哭包还要装酷","F"],["太完美了，像不真实的人","G"]]],
+
+  // 第四章 命运红线
+  ["在平行时空里，你们相遇的地点会是？",[["大学社团的天台","Y"],["深夜的便利店","WX"],["一场私人画展","G"],["一场意外的雨里，TA 把伞递给你","B"]]],
+  ["你希望你们的关系是？",[["灵魂知己，懂彼此的沉默","CG"],["欢喜冤家，见面就斗嘴","XF"],["青梅竹马，一起长大","Y"],["双向奔赴，互相成就","SB"]]],
+  ["你相信“一见钟情”吗？",[["信，我就是这样被 TA 拿下的","S"],["更相信日久生情","W"],["本来不信，遇到 TA 之后信了","F"],["我一见钟情的是 TA 的作品","C"]]],
+  ["凭直觉抽一张命运卡牌：",[["☀️ 太阳","YX"],["🌙 月亮","GW"],["⭐ 星星","S"],["🌹 玫瑰","B"]]],
+  ["一句话形容你和 TA 的距离：",[["隔着屏幕，也隔着光年","G"],["近到能在耳机里听见 TA 的呼吸","C"],["我在台下，TA 在台上，刚刚好","S"],["远是远了点，但 TA 一直都在","WB"]]],
+  ["如果 TA 给你写一封信，开头会是？",[["“嘿，今天也很想你。”","B"],["“谢谢你一直都在。”","W"],["“别哭啦，笑一个。”","XY"],["“我新写了一段旋律……”","C"]]],
+  ["你更喜欢哪种结局？",[["盛大的烟火和告白","SB"],["平淡温暖的日常","W"],["开放式结局，留一点想象","FC"],["多年后重逢，相视一笑","G"]]],
+  ["选一种颜色，作为你们的“红线”：",[["樱花粉","B"],["薄荷绿","Y"],["星空紫","F"],["香槟金","GS"]]],
+  ["如果能对十年后的 TA 说一句话：",[["“你还站在舞台上吗？”","S"],["“你现在过得开心吗？”","XW"],["“还在写歌吗？”","C"],["“今天有好好吃饭吗？”","WB"]]],
+  ["最后，凭直觉选一个词送给 TA：",[["闪耀","S"],["温柔","W"],["自由","YF"],["唯一","B"]]]
+];
+
+const TOTAL = QUESTIONS.length;
+const PER_CHAPTER = 10;
+const STORE_KEY = "idol_test_v1";
+const $ = id => document.getElementById(id);
+
+/* ---------- 状态 ---------- */
+let answers = new Array(TOTAL).fill(null);
+let current = 0;
+let busy = false;
+let nickname = "";
+
+function save(){
+  try{ localStorage.setItem(STORE_KEY, JSON.stringify({answers,current,nickname})); }catch(e){}
+}
+function load(){
+  try{ const d = JSON.parse(localStorage.getItem(STORE_KEY)||"null");
+       if(d && Array.isArray(d.answers) && d.answers.length===TOTAL) return d; }catch(e){}
+  return null;
+}
+function clearSave(){ try{ localStorage.removeItem(STORE_KEY); }catch(e){} }
+
+/* ---------- 星星 ---------- */
+(function makeStars(){
+  const box = $("stars"); let html = "";
+  for(let i=0;i<46;i++){
+    html += `<i style="left:${Math.random()*100}%;top:${Math.random()*100}%;animation-delay:${(Math.random()*3).toFixed(2)}s;transform:scale(${(Math.random()*1.2+.4).toFixed(2)})"></i>`;
+  }
+  box.innerHTML = html;
+})();
+
+/* ---------- 图片素材 ---------- */
+const emb = k => `assets/emblem_${k}.webp`;
+(function(){ const img = new Image(); img.onload = ()=>$("bgPhoto").classList.add("ready"); img.src = "assets/hero.webp"; })();
+$("homeEmblems").innerHTML = ORDER.map((k,i)=>`<img src="${emb(k)}" alt="" style="animation-delay:${(-i*.4).toFixed(1)}s">`).join("");
+// 图片加载失败时退回 emoji
+function emblemHTML(k){ return `<img src="${emb(k)}" alt="${TYPES[k].name}" onerror="this.replaceWith(document.createTextNode('${TYPES[k].emoji}'))">`; }
+
+/* ---------- 切换页面 ---------- */
+function show(id){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  $(id).classList.add("active");
+  document.body.classList.toggle("on-home", id==="home");
+  window.scrollTo({top:0,behavior:"instant" in window ? "instant" : "auto"});
+}
+
+/* ---------- 首页 ---------- */
+const saved = load();
+if(saved && saved.answers.some(a=>a!==null) && saved.answers.some(a=>a===null)){
+  $("resumeBtn").hidden = false;
+  $("resumeBtn").textContent = `继续上次的进度（第 ${saved.current+1} 题）`;
+  if(saved.nickname) $("nick").value = saved.nickname;
+}
+$("startBtn").addEventListener("click",()=>{
+  nickname = $("nick").value.trim();
+  answers = new Array(TOTAL).fill(null); current = 0; save();
+  startQuiz(true);
+});
+$("resumeBtn").addEventListener("click",()=>{
+  answers = saved.answers; current = Math.min(saved.current, TOTAL-1);
+  nickname = $("nick").value.trim() || saved.nickname || "";
+  startQuiz(false);
+});
+$("nick").addEventListener("keydown",e=>{ if(e.key==="Enter") $("startBtn").click(); });
+
+function startQuiz(withIntro){
+  show("quiz");
+  render("in");
+  if(withIntro) showChapter(0);
+}
+
+/* ---------- 章节过场 ---------- */
+function showChapter(ch, done){
+  const c = CHAPTERS[ch];
+  $("ccNo").textContent = `CHAPTER ${["I","II","III","IV"][ch]}`;
+  $("ccTitle").textContent = c.title;
+  $("ccSub").textContent = c.sub;
+  const card = $("chapterCard");
+  card.classList.add("show");
+  busy = true;
+  setTimeout(()=>{ card.classList.remove("show"); busy = false; done && done(); }, 1300);
+}
+
+/* ---------- 渲染题目 ---------- */
+function render(anim){
+  const [q, opts] = QUESTIONS[current];
+  const ch = Math.floor(current / PER_CHAPTER);
+  $("qno").textContent = `Q${String(current+1).padStart(2,"0")}`;
+  $("qtext").textContent = q;
+  $("qIndex").textContent = current+1;
+  $("chapterLabel").textContent = `第${["一","二","三","四"][ch]}章 · ${CHAPTERS[ch].title}`;
+  const answered = answers.filter(a=>a!==null).length;
+  $("barFill").style.width = (Math.max(answered, current) / TOTAL * 100) + "%";
+  document.querySelectorAll(".dots span").forEach((d,i)=>d.classList.toggle("on", i < ch || (i===ch && current%PER_CHAPTER===PER_CHAPTER-1 && answers[current]!==null)));
+  $("backBtn").disabled = current === 0;
+
+  const box = $("options"); box.innerHTML = "";
+  opts.forEach((o,i)=>{
+    const b = document.createElement("button");
+    b.className = "opt" + (answers[current]===i ? " picked" : "");
+    b.innerHTML = `<span class="key">${"ABCD"[i]}</span><span></span>`;
+    b.lastChild.textContent = o[0];
+    b.addEventListener("click",()=>pick(i,b));
+    box.appendChild(b);
+  });
+  const card = $("qcard");
+  card.classList.remove("out","in","in-back"); void card.offsetWidth;
+  card.classList.add(anim);
+}
+
+function pick(i, el){
+  if(busy) return;
+  busy = true;
+  answers[current] = i; save();
+  document.querySelectorAll(".opt").forEach(o=>o.classList.remove("picked"));
+  el.classList.add("picked");
+  $("barFill").style.width = (answers.filter(a=>a!==null).length / TOTAL * 100) + "%";
+  setTimeout(()=>{
+    if(current === TOTAL-1){ busy = false; finish(); return; }
+    const card = $("qcard");
+    card.classList.remove("in","in-back"); card.classList.add("out");
+    setTimeout(()=>{
+      current++; save();
+      busy = false;
+      render("in");
+      if(current % PER_CHAPTER === 0) showChapter(current / PER_CHAPTER);
+    }, 260);
+  }, 300);
+}
+
+$("backBtn").addEventListener("click",()=>{
+  if(busy || current===0) return;
+  current--; save(); render("in-back");
+});
+document.addEventListener("keydown",e=>{
+  if(!$("quiz").classList.contains("active")) return;
+  const k = e.key.toUpperCase();
+  const idx = "ABCD1234".indexOf(k);
+  if(idx>-1){ const opts = document.querySelectorAll(".opt"); const n = idx%4; if(opts[n]) opts[n].click(); }
+  if(e.key==="ArrowLeft" || e.key==="Backspace") $("backBtn").click();
+});
+
+/* ---------- 计分 ----------
+   每种类型在题库里出现的总分不同，直接比原始分会偏向出现多的类型；
+   所以先除以该类型在题库中的总分池（POOL），8 种结果出现概率才均衡 */
+const POOL = {}; ORDER.forEach(k=>POOL[k]=0);
+QUESTIONS.forEach(([,opts])=>opts.forEach(([,code])=>[...code].forEach((k,j)=>{ POOL[k] += j===0 ? 2 : 1; })));
+function score(){
+  const raw = {}; ORDER.forEach(k=>raw[k]=0);
+  answers.forEach((a,qi)=>{
+    if(a===null) return;
+    const code = QUESTIONS[qi][1][a][1];
+    [...code].forEach((k,j)=>{ raw[k] += j===0 ? 2 : 1; });
+  });
+  const s = {}; ORDER.forEach(k=>s[k] = raw[k] / POOL[k] * 100);
+  // 同分时按最后 10 题（命运红线）里的得分决定，再按固定顺序
+  const late = {}; ORDER.forEach(k=>late[k]=0);
+  answers.slice(30).forEach((a,qi)=>{ if(a===null) return; late[QUESTIONS[30+qi][1][a][1][0]]++; });
+  const ranked = ORDER.slice().sort((a,b)=> s[b]-s[a] || late[b]-late[a] || ORDER.indexOf(a)-ORDER.indexOf(b));
+  return {s, ranked};
+}
+
+/* ---------- 结果 ---------- */
+const LOADING_TEXTS = ["正在连接你的红线……","正在翻阅你的心动记录……","正在匹配 8 种本命类型……","缘分即将揭晓 ✦"];
+function finish(){
+  show("loading");
+  let i = 0; $("loadingText").textContent = LOADING_TEXTS[0];
+  const t = setInterval(()=>{ i++; if(i<LOADING_TEXTS.length) $("loadingText").textContent = LOADING_TEXTS[i]; }, 650);
+  setTimeout(()=>{ clearInterval(t); renderResult(); clearSave(); }, 2700);
+}
+
+function hash(str){ let h = 2166136261; for(const c of str){ h ^= c.charCodeAt(0); h = Math.imul(h,16777619); } return Math.abs(h); }
+
+function renderResult(){
+  const {s, ranked} = score();
+  const top = ranked[0], second = ranked[1];
+  const T = TYPES[top];
+  const total = ORDER.reduce((n,k)=>n+s[k],0) || 1;
+  const share = s[top] / total;                          // 主类型占比
+  const gap = (s[top] - s[second]) / (s[top] || 1);       // 领先幅度
+  const fate = Math.min(99, Math.round(86 + share*28 + gap*8)); // 86~99
+  const sig = hash(answers.join("") + top);
+
+  const card = $("shareCard");
+  card.style.setProperty("--card-bg", T.bg);
+  card.style.setProperty("--c1", T.c1);
+  card.style.setProperty("--c2", T.c2);
+
+  const d = new Date();
+  $("rDate").textContent = `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,"0")}.${String(d.getDate()).padStart(2,"0")}`;
+  $("rWho").textContent = (nickname ? `${nickname} 的` : "你的") + "本命爱豆类型是";
+  $("rEmoji").innerHTML = emblemHTML(top);
+  $("rName").textContent = T.name;
+  $("rAlias").textContent = T.alias;
+  $("rTags").innerHTML = T.tags.map(t=>`<span>${t}</span>`).join("");
+  $("rFate").innerHTML = `${fate}<small>%</small>`;
+  $("rRing").style.setProperty("--p", 0);
+  requestAnimationFrame(()=>{ animateRing(fate); });
+  $("rFateText").innerHTML = `<b>${T.fateLine}</b>你身上还有 ${Math.round(s[second]/total*100)}% 的「${TYPES[second].name}」气质，所以 TA 偶尔也会让你看到${{S:"耀眼的一面",W:"温柔的一面",Y:"少年气的一面",F:"可爱的反差",C:"才华横溢的一面",G:"清冷的一面",X:"搞笑的一面",B:"宠粉的一面"}[second]}。`;
+  $("rPortrait").textContent = T.portrait;
+  $("rWhy").textContent = T.why;
+  $("rFan").textContent = T.fan;
+  $("rColor").innerHTML = `<i class="swatch" style="background:${T.color[1]}"></i>${T.color[0]}`;
+  $("rMeet").textContent = T.meet;
+  $("rCode").textContent = T.code;
+  $("rNo").textContent = `NO.${String(sig % 100000).padStart(5,"0")}`;
+
+  // 前 4 类型契合度（按得分映射到 52~99）
+  const max = s[top] || 1;
+  $("rBars").innerHTML = ranked.slice(0,4).map((k,i)=>{
+    const pct = i===0 ? fate : Math.max(52, Math.round(fate * (s[k]/max) * .98));
+    return `<div class="row"><span>${TYPES[k].emoji} ${TYPES[k].name}</span><div class="track"><i data-w="${pct}"></i></div><span>${pct}%</span></div>`;
+  }).join("");
+
+  $("allTypes").innerHTML = ORDER.map(k=>`<div class="${k===top?"me":""}">${emblemHTML(k)}<b>${TYPES[k].name}</b><span>${TYPES[k].alias}</span></div>`).join("");
+
+  show("result");
+  setTimeout(()=>{ document.querySelectorAll("#rBars i").forEach(i=>i.style.width = i.dataset.w + "%"); }, 250);
+
+  window.__lastResult = {top, fate, name:T.name, alias:T.alias, code:T.code};
+}
+
+function animateRing(target){
+  const ring = $("rRing"); const start = performance.now(); const dur = 1400;
+  (function step(now){
+    const t = Math.min(1,(now-start)/dur); const e = 1-Math.pow(1-t,3);
+    ring.style.setProperty("--p", (target*e).toFixed(1));
+    if(t<1) requestAnimationFrame(step);
+  })(start);
+}
+
+/* ---------- 结果页按钮 ---------- */
+function toast(msg){
+  const t = $("toast"); t.textContent = msg; t.classList.add("show");
+  clearTimeout(toast._t); toast._t = setTimeout(()=>t.classList.remove("show"), 1800);
+}
+$("copyBtn").addEventListener("click",()=>{
+  const r = window.__lastResult; if(!r) return;
+  const text = `我测出来的本命爱豆类型是【${r.name}】—— ${r.alias}！缘分指数 ${r.fate}%，红线暗号${r.code} 💫 你的本命是哪一型？#本命爱豆测试 #追星 #心理测试`;
+  const done = ()=>toast("文案已复制，去粘贴吧 ✦");
+  if(navigator.clipboard && window.isSecureContext){
+    navigator.clipboard.writeText(text).then(done).catch(()=>fallbackCopy(text,done));
+  }else fallbackCopy(text,done);
+});
+function fallbackCopy(text, done){
+  const ta = document.createElement("textarea"); ta.value = text; ta.style.cssText = "position:fixed;opacity:0";
+  document.body.appendChild(ta); ta.select();
+  try{ document.execCommand("copy"); done(); }catch(e){ toast("复制失败，请手动截图分享"); }
+  ta.remove();
+}
+$("retryBtn").addEventListener("click",()=>{
+  answers = new Array(TOTAL).fill(null); current = 0; clearSave();
+  $("resumeBtn").hidden = true;
+  show("home");
+});
+
+})();
+</script>
+</body>
+</html>
